@@ -259,7 +259,7 @@ a{
                             <div class="exercise-routine"></div>
                             <div class="water-consumtion"></div>
                             <div class="body-weight"></div>
-                            <a href="addform.php"><button class="add-btn">+</button></a>
+                            <a href="add.php"><button class="add-btn">+</button></a>
                         </div>
                     </div>
                 <?php
