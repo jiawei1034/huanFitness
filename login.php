@@ -12,7 +12,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $password = $_POST['password'];
 
     // Prepare and bind
-    $stmt = $conn->prepare("SELECT email, password FROM userdata WHERE email = ?");
+    $stmt = $conn->prepare("SELECT is_admin, password FROM userdata WHERE email = ?");
     $stmt->bind_param("s", $email);
 
     // Execute the query
@@ -22,7 +22,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // If the user is found in the database
     if ($stmt->num_rows > 0) {
         // Bind the result to variables
-        $stmt->bind_result($id, $hashed_password);
+        $stmt->bind_result($is_admin, $hashed_password);
         $stmt->fetch();
 
         // Verify the password
@@ -31,8 +31,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $_SESSION['email'] = $email;
             $_SESSION['logged_in'] = true;
 
-            // Redirect to a new page after login
-            header("Location: index.php");
+            // Check user role and redirect accordingly
+            if ($is_admin == 1) {
+                // Redirect to admin page
+                header("Location: admin.php");
+            } elseif ($is_admin == 2) {
+                // Redirect to nutrition page
+                header("Location: nutrition.php");
+            } else {
+                // Redirect to user page
+                header("Location: user.php");
+            }
             exit();
         } else {
             $error = "Invalid email or password!";
