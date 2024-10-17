@@ -1,3 +1,41 @@
+<?php
+require 'connect.php'; // Database connection
+
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    // Get form data
+    $email = $_POST['email'];
+    $password = $_POST['password'];
+    $phone_number = $_POST['phone_number'];
+    $dateOfBirth = $_POST['dateOfBirth'];
+    $gender = $_POST['gender'];
+
+    // Set is_admin to 0 by default (not an admin)
+    $is_admin = 0;
+
+    // Hash the password for security
+    $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+
+    // Prepare the SQL statement
+    $stmt = $conn->prepare("INSERT INTO userdata (phoneNum, email, password, dateOfBirth, gender, is_admin) VALUES (?, ?, ?, ?, ?, ?)");
+    
+    // Bind parameters (s for string, i for integer)
+    $stmt->bind_param("sssssi", $phone_number, $email, $hashed_password, $dateOfBirth, $gender, $is_admin);
+
+    // Execute the query
+    if ($stmt->execute()) {
+        echo "<script>openModal();</script>";
+    } else {
+        echo "Error: " . $stmt->error;
+    }
+
+    header("Location: login.php");
+    exit();
+
+    // Close the statement and connection
+    $stmt->close();
+    $conn->close();
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -5,6 +43,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Register Form Website</title>
 </head>
+<script>
+function openModal() {
+    document.getElementById('successModal').style.display = "block";
+}
+
+function closeModal() {
+    document.getElementById('successModal').style.display = "none";
+}
+</script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
 
@@ -197,6 +244,42 @@ form .field input[type="submit"]{
     justify-content: center;
     align-items: center;
 }
+
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1; /* Sit on top */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgb(0,0,0); /* Fallback color */
+    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: 15% auto; /* 15% from the top and centered */
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%; /* Could be more or less, depending on screen size */
+}
+
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+
 </style>
 <body>
     <div class="container">
@@ -214,7 +297,7 @@ form .field input[type="submit"]{
                         <input type="password" name="password" placeholder="Password" required>
                     </div>
                     <div class="field">
-                        <input type="number" name="phone_number" placeholder="Phone Number" reuired>
+                        <input type="number" name="phone_number" placeholder="Phone Number" required>
                     </div>
                     <div class="field">
                         <input type="date" id="dateOfBirth" name="dateOfBirth">
@@ -232,42 +315,12 @@ form .field input[type="submit"]{
                 </form>
             </div>
         </div>
+        <div id="successModal" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeModal()">&times;</span>
+                <p>Signup successful!</p>
+            </div>
     </div>
 </div>
 </body>
 <html>
-<?php
-require 'connect.php'; // Database connection
-
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    // Get form data
-    $email = $_POST['email'];
-    $password = $_POST['password'];
-    $phone_number = $_POST['phone_number'];
-    $dateOfBirth = $_POST['dateOfBirth'];
-    $gender = $_POST['gender'];
-
-    // Set is_admin to 0 by default (not an admin)
-    $is_admin = 0;
-
-    // Hash the password for security
-    $hashed_password = password_hash($password, PASSWORD_DEFAULT);
-
-    // Prepare the SQL statement
-    $stmt = $conn->prepare("INSERT INTO userdata (phoneNum, email, password, dateOfBirth, gender, is_admin) VALUES (?, ?, ?, ?, ?, ?)");
-    
-    // Bind parameters (s for string, i for integer)
-    $stmt->bind_param("sssssi", $phone_number, $email, $hashed_password, $dateOfBirth, $gender, $is_admin);
-
-    // Execute the query
-    if ($stmt->execute()) {
-        echo "Signup successful!";
-    } else {
-        echo "Error: " . $stmt->error;
-    }
-
-    // Close the statement and connection
-    $stmt->close();
-    $conn->close();
-}
-?>
