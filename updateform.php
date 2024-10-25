@@ -1,39 +1,30 @@
 <?php
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-$routine=empty($_POST["routine"])?"":$_POST["routine"];
-$rdate=empty($_POST["rdate"])?"":$_POST["rdate"];
-$stime=empty($_POST["stime"])?"":$_POST["stime"];
-$duration=empty($_POST["duration"])?"":$_POST["duration"];
-$sets=empty($_POST["sets"])?"":$_POST["sets"];
-
-if(isset($_POST["level"]))
-	$level=$_POST["level"];
-else
-	$level="";
-
-$weight=empty($_POST["weight"])?"":$_POST["weight"];
-$watercon=empty($_POST["watercon"])?"":$_POST["watercon"];
-
-$record = date_create($rdate);
-$date = date_format($record,"Y-m-d"); 
+$detailsID= isset($_GET["detailsID"])?$_GET["detailsID"]:"";
 
 require 'connect.php';
 
-$stmt = $conn->prepare("INSERT INTO details
-(routine, rdate, stime, duration, sets, level, weight, watercon) VALUES(?, ?, ?, ?, ?, ?, ?, ?)");
-$stmt->bind_param('ssssssii',$routine, $date, $stime, $duration, $sets, $level, $weight, $watercon);
+$sql = "SELECT * FROM details WHERE detailsID=$detailsID";
 
-if ($stmt->execute()) {
-    $stmt->close();
-    $conn->close();
+$result = mysqli_query($conn, $sql);
 
-    header("Location: home.php");
-    exit(); 
-} else {
-    echo "Error: " . $stmt->error;
-}
-}
+if (mysqli_num_rows($result) > 0) {
+  // output data of each row
+  while($row = mysqli_fetch_assoc($result)) {
+	$detailsID=$row["detailsID"]; 
+	$routine=$row["routine"];
+	$date=$row["rdate"];
+	$stime=$row["stime"];
+	$duration = $row["duration"];
+	$sets = $row["sets"];
+	$level=$row["level"];
+	$weight = $row["weight"];
+    $watercon = $row["watercon"];
+  }
+} 
+
+mysqli_close($conn);
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -122,7 +113,7 @@ button {
     margin-top: 10px;
 }
 
-button.clear {
+button.cancel {
     background-color: #f44336;
 }
 
@@ -154,43 +145,43 @@ a{
 		}
 
 </style>
-
 <head><title>Huan Fitness</title></head>
 <body>
         <!-- Navigation Bar -->
         <?php require 'navbar.php';?>
 
-		<div class="box">
-		<form action="<?php echo $_SERVER['PHP_SELF'];?>" method="POST">
+<div class="box">
+	<form name="update" action="update.php" method="POST">
 		<h2>Exercise Info</h2>
-		<!--Name Input-->
+
+        <input type="hidden" name="detailsID" value="<?php echo htmlspecialchars($detailsID); ?>">
+
         <label for="routine">Routine:</label>
         <input type="text" size="25" id="routine" name="routine" 
-		maxlength="30" placeholder="eg. Push Up" required><br><br>
+		maxlength="30" placeholder="eg. Push Up" required value="<?php echo htmlspecialchars($routine); ?>"><br><br>
 
         <label for="rdate">Date:</label>
-		<input type="date" id="rdate" name="rdate" value="<?=date("Y-m-d")?>"
-		max="2025-12-31"><br><br>
+		<input type="date" id="rdate" name="rdate" readonly value="<?php echo htmlspecialchars($date); ?>" max="2025-12-31"><br><br>
 
         <label for="stime">Starting Time:</label>
-        <input type="time" size="25" id="stime" name="stime"><br><br>
+        <input type="time" size="25" id="stime" name="stime" value="<?php echo htmlspecialchars($stime); ?>"><br><br>
 
 		<div class="container">
 			<div class="item">
             <label for="duration">Durations(Minutes):</label>
 		        <select name="duration" id="type">
-				    <option value="10min">10</option>
-				    <option value="20min">20</option>
-				    <option value="30min">30</option>
-				    <option value="40min">40</option>
-				    <option value="50min">50</option>
-				    <option value="60min">60</option>
+				    <option value="10min" <?php echo ($duration == "10min") ? 'selected' : ''; ?>>10</option>
+				    <option value="20min" <?php echo ($duration == "20min") ? 'selected' : ''; ?>>20</option>
+				    <option value="30min" <?php echo ($duration == "30min") ? 'selected' : ''; ?>>30</option>
+				    <option value="40min" <?php echo ($duration == "40min") ? 'selected' : ''; ?>>40</option>
+				    <option value="50min" <?php echo ($duration == "50min") ? 'selected' : ''; ?>>50</option>
+				    <option value="60min" <?php echo ($duration == "60min") ? 'selected' : ''; ?>>60</option>
 		        </select>
 			</div>
 
 			<div class="item">
                 <label for="sets">Sets:</label>
-                <input type="number" id="sets" name="sets"><br><br>
+                <input type="number" id="sets" name="sets" value="<?php echo htmlspecialchars($sets); ?>"><br><br>
 			</div>
 		</div>
 
@@ -198,30 +189,32 @@ a{
         <div class="container">
             <div class="item radio-container">	
                 <label for="low">Low</label> 
-                <input type="radio" id="low" name="level" value="low" checked>
+                <input type="radio" id="low" name="level" value="low" <?php echo ($level == "low") ? 'checked' : ''; ?> checked>
             </div>
             <div class="item radio-container">
                 <label for="medium">Medium</label>
-		        <input type="radio" id="medium" name="level" value="medium">
+		        <input type="radio" id="medium" name="level" value="medium" <?php echo ($level == "low") ? 'checked' : ''; ?>>
             </div>
             <div class="item radio-container">
                 <label for="high">High</label>
-                <input type="radio" id="high" name="level" value="high"><br><br><br><br>
+                <input type="radio" id="high" name="level" value="high" <?php echo ($level == "low") ? 'checked' : ''; ?>><br><br><br><br>
             </div>
         </div>
 
         <label for="weight">Weight(kg):</label>
-        <input type="number" id="weight" name="weight"><br><br>
+        <input type="number" id="weight" name="weight" value="<?php echo htmlspecialchars($weight); ?>"><br><br>
 
-		<!--drop-down list / combobox-->
+
 		<label for="water">Water Consumtion(Litre):</label>
-		<input type="number" id="watercon" name="watercon"><br><br>
+		<input type="number" id="watercon" name="watercon" value="<?php echo htmlspecialchars($watercon); ?>"><br><br>
 		
 			<div class="buttons">
-				<button type="submit" id="submit" name="submit">Add</button>
-				<button type="reset" value="Clear" id="reset" name="reset" class="clear">Clear</button>	
+				<button type="submit" id="submit" name="submit">Update</button>
+				<button type="button" onclick="window.history.back();" class="cancel">Cancel</button>   
 			</div>
 	</form>
 </div>
 </body>
 </html>
+
+
