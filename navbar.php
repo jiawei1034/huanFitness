@@ -80,9 +80,9 @@ body {
 <div class="navbar">
     <a class="logo" href="home.php">Huan Fitness</a>
             <ul>
-                <li><a href="h.php">Home</a></li>
+                <li><a href="home.php">Home</a></li>
                 <li><a href="#">Physical Training</a></li>
                 <li><a href="#">Membership</a></li>
-                <li><a href="#">Book Now</a></li>
+                <li><a href="booking.php">Book Now</a></li>
             </ul>
         </div>

@@ -1,4 +1,5 @@
 <?php
+session_start(); // Start the session
 require 'connect.php';
 
 // Check the connection
@@ -12,7 +13,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $password = $_POST['password'];
 
     // Prepare and bind
-    $stmt = $conn->prepare("SELECT email, password FROM userdata WHERE email = ?");
+    $stmt = $conn->prepare("SELECT userID, is_admin, password FROM userdata WHERE email = ?");
     $stmt->bind_param("s", $email);
 
     // Execute the query
@@ -22,17 +23,24 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // If the user is found in the database
     if ($stmt->num_rows > 0) {
         // Bind the result to variables
-        $stmt->bind_result($id, $hashed_password);
+        $stmt->bind_result($userID, $is_admin, $hashed_password);
         $stmt->fetch();
 
         // Verify the password
         if (password_verify($password, $hashed_password)) {
-            // If password is correct, set session and redirect
+            // If password is correct, set session variables
+            $_SESSION['userID'] = $userID;
             $_SESSION['email'] = $email;
             $_SESSION['logged_in'] = true;
 
-            // Redirect to a new page after login
-            header("Location: index.php");
+            // Check user role and redirect accordingly
+            if ($is_admin == 1) {
+                header("Location: admin.php");
+            } elseif ($is_admin == 2) {
+                header("Location: nutrition.php");
+            } else {
+                header("Location: home.php");
+            }
             exit();
         } else {
             $error = "Invalid email or password!";

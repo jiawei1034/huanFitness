@@ -1,4 +1,5 @@
 <?php
+session_start();
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
 $routine=empty($_POST["routine"])?"":$_POST["routine"];
 $rdate=empty($_POST["rdate"])?"":$_POST["rdate"];
@@ -19,9 +20,9 @@ $date = date_format($record,"Y-m-d");
 
 require 'connect.php';
 
-$stmt = $conn->prepare("INSERT INTO details
-(routine, rdate, stime, duration, sets, level, weight, watercon) VALUES(?, ?, ?, ?, ?, ?, ?, ?)");
-$stmt->bind_param('ssssssii',$routine, $date, $stime, $duration, $sets, $level, $weight, $watercon);
+$stmt = $conn->prepare("INSERT INTO details (USERID, rdate, stime, duration, sets, level, weight, watercon) 
+VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+$stmt->bind_param("isssiiii", $_SESSION['userID'], $rdate, $stime, $duration, $sets, $level, $weight, $watercon);
 
 if ($stmt->execute()) {
     $stmt->close();

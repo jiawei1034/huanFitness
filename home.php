@@ -1,7 +1,8 @@
 <?php
+session_start();
 require 'connect.php';
 
-$totalLastWeek = "SELECT COUNT(*) as totalExerciseLastWeek FROM details WHERE rdate >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)";
+$totalLastWeek = "SELECT COUNT(*) as totalExerciseLastWeek FROM details WHERE rdate >= DATE_SUB(CURDATE(), INTERVAL 7 DAY) AND userID = ". $_SESSION['userID'] . "";
 
 $resultLastWeek = mysqli_query($conn, $totalLastWeek);
 $totalExerciseLastWeek = 0; 
@@ -11,8 +12,9 @@ if ($resultLastWeek) {
     $totalExerciseLastWeek = $row['totalExerciseLastWeek'];
 }
 
-$sql = "SELECT rdate, COUNT(*) as total_exercises FROM details GROUP BY rdate";
-$totalwatercon = "SELECT rdate, SUM(watercon) as total_watercon FROM details GROUP BY rdate";
+$sql = "SELECT rdate, COUNT(*) as total_exercises FROM details WHERE userID = ". $_SESSION['userID'] . " GROUP BY rdate";
+
+$totalwatercon = "SELECT rdate, SUM(watercon) as total_watercon FROM details WHERE userID = ". $_SESSION['userID'] . " GROUP BY rdate";
 
 $resultTotalEcerciseDone = mysqli_query($conn, $sql);
 $resultTotalWatercon = mysqli_query($conn, $totalwatercon);

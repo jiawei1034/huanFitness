@@ -1,7 +1,8 @@
 <?php
+session_start();
 require 'connect.php';
 
-$sqlLastWeek = "SELECT * FROM details WHERE rdate >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)";
+$sqlLastWeek = "SELECT * FROM details WHERE rdate >= DATE_SUB(CURDATE(), INTERVAL 7 DAY) AND userID = ". $_SESSION['userID'] . "";
 $resultLastWeek = mysqli_query($conn, $sqlLastWeek);
 
 $key = isset($_GET['search']) ? $_GET['search'] : '';

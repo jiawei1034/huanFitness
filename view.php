@@ -1,11 +1,12 @@
 <?php
+session_start();
 $detailsID = isset($_GET["detailsID"]) ? $_GET["detailsID"] : "";
 
 require 'connect.php';
 
 $date = isset($_GET['date']) ? $_GET['date'] : '';
 
-$sql = "SELECT * FROM details WHERE rdate = ?";
+$sql = "SELECT * FROM details WHERE rdate = ? AND userID = ". $_SESSION['userID'] . "";
 $stmt = $conn->prepare($sql);
 $stmt->bind_param('s', $date);
 $stmt->execute();
