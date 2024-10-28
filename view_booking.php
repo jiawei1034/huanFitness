@@ -138,6 +138,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['cancel_booking'])) {
             font-size: 24px;
         }
     </style>
+    <script>
+        // Function to confirm booking cancellation
+        function confirmCancellation() {
+            return confirm("Are you sure you want to cancel this booking?");
+        }
+    </script>
 </head>
 <body>
 
@@ -150,10 +156,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['cancel_booking'])) {
 
 <?php
 // Query to fetch bookings for the logged-in user
-$sql = "SELECT b.booking_id, u.userID, b.name, b.phoneNum, b.date, b.time, nu.name AS nutritionist_name 
-FROM booking b, userdata u, nutritionist nu 
-WHERE b.nutritionistID = nu.nutritionistID AND u.userID = " . $_SESSION['userID'] . " 
-ORDER BY b.date DESC ";
+$sql = "SELECT b.booking_id, b.name, b.phoneNum, b.date, b.time, b.status, nu.name AS nutritionist_name 
+FROM booking b, nutritionist nu 
+WHERE b.nutritionistID = nu.nutritionistID AND b.email = '" . $_SESSION['email'] . "' 
+ORDER BY b.date DESC";
+
 $stmt = $conn->prepare($sql);
 $stmt->execute();
 $result = $stmt->get_result();
@@ -173,7 +180,7 @@ if ($result->num_rows > 0) {
             <div class="booking-details">
                 <div class="booking-tags">
                     <span class="tag badminton">APPOINTMENT</span>
-                    <span class="tag confirmed">CONFIRMED</span>
+                    <span class="tag confirmed">' . htmlspecialchars($row['status']) . '</span>
                 </div>
                 <div class="booking-title">' . htmlspecialchars($row['name']) . '</div>
                 <div class="booking-time">' . htmlspecialchars($row['time']) . '</div>
@@ -182,7 +189,7 @@ if ($result->num_rows > 0) {
                 <!-- Cancel Booking Form -->
                 <form method="POST" action="">
                     <input type="hidden" name="booking_id" value="' . htmlspecialchars($row['booking_id']) . '">
-                    <button type="submit" class="cancel-btn" name="cancel_booking">Cancel</button>
+                    <button type="submit" class="cancel-btn" name="cancel_booking" onclick="return confirmCancellation()">Cancel</button>
                 </form>
             </div>
         </div>';

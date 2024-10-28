@@ -37,7 +37,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             if ($is_admin == 1) {
                 header("Location: admin.php");
             } elseif ($is_admin == 2) {
-                header("Location: nutrition.php");
+                header("Location: nutritionist.php");
             } else {
                 header("Location: home.php");
             }

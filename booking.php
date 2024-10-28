@@ -1,15 +1,16 @@
 <?php
 require 'connect.php';
-
+session_start();
 $successMessage = ''; // Initialize a variable to hold success message
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $name = $_POST['name'];
     $phoneNum = $_POST['phoneNum'];
-    $email = $_POST['email'];
+    $email = $_SESSION['email'];
     $date = $_POST['date'];
     $time = $_POST['time'];
     $nutritionist = $_POST['nutritionist'];
+    $status = "PENDING";
 
     // Convert the date to the format YYYY-MM-DD
     $dateTime = DateTime::createFromFormat('F d, Y', $date);
@@ -22,10 +23,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 
     // Prepare the SQL statement
-    $stmt = $conn->prepare("INSERT INTO booking (name, phoneNum, email, date, time, nutritionistid) VALUES (?, ?, ?, ?, ?, ?)");
+    $stmt = $conn->prepare("INSERT INTO booking (name, phoneNum, email, date, time, nutritionistid, status) VALUES (?, ?, ?, ?, ?, ?, ?)");
     
     // Bind parameters (s for string)
-    $stmt->bind_param("ssssss", $name, $phoneNum, $email, $date, $time, $nutritionist);
+    $stmt->bind_param("sssssss", $name, $phoneNum, $email, $date, $time, $nutritionist, $status);
 
     // Execute the query
     if ($stmt->execute()) {
@@ -162,10 +163,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     <input type="text" name="phoneNum" id="phoneNum" placeholder="Enter your phone number" class="formbold-form-input" required />
                 </div>
 
-                <div class="formbold-mb-5">
+                <!-- <div class="formbold-mb-5">
                     <label for="email" class="formbold-form-label">Email Address</label>
                     <input type="email" name="email" id="email" placeholder="Enter your email" class="formbold-form-input" required />
-                </div>
+                </div> -->
 
                 <div class="formbold-mb-5">
                     <label for="date" class="formbold-form-label">Select Date</label>
@@ -188,9 +189,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 <div class="formbold-mb-5">
                     <label for="nutritionist" class="formbold-form-label">Select Your Nutritionist</label>
                     <select name="nutritionist" id="nutritionist" class="formbold-form-select" required>
-                        <option value="MR DICKSON DUCK">MR DICKSON DUCK</option>
-                        <option value="MISS EMILY TAN">MISS EMILY TAN</option>
-                        <option value="MR JAY CHOU">MR JAY CHOU</option>
+                        <option value="110001">Mr DICKSON DUCK</option>
+                        <option value="110002">Ms EMILY TAN</option>
+                        <option value="110003">Mr JAY CHOU</option>
                     </select>
                 </div>
 
