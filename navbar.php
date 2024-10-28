@@ -81,8 +81,8 @@ body {
     <a class="logo" href="home.php">Huan Fitness</a>
             <ul>
                 <li><a href="home.php">Home</a></li>
-                <li><a href="#">Physical Training</a></li>
+                <li><a href="view_booking.php">Booking</a></li>
                 <li><a href="#">Membership</a></li>
-                <li><a href="view_booking.php">Book Now</a></li>
+                <li><a href="#">Leaderboard</a></li>
             </ul>
         </div>

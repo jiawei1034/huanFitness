@@ -9,7 +9,7 @@ if ($detailsID <= 0) {
 
 require 'connect.php';
 
-$stmt = $conn->prepare("DELETE FROM details WHERE detailsID = ?");
+$stmt = $conn->prepare("DELETE FROM details WHERE ID = ?");
 $stmt->bind_param('i', $detailsID); 
 
 if ($stmt->execute()) {

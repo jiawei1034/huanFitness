@@ -2,22 +2,27 @@
 session_start();
 require 'connect.php';
 
-$sqlLastWeek = "SELECT * FROM details WHERE rdate >= DATE_SUB(CURDATE(), INTERVAL 7 DAY) AND userID = ". $_SESSION['userID'] . "";
-$resultLastWeek = mysqli_query($conn, $sqlLastWeek);
+// Prepare the SQL query for fetching records from the last week for the current user
+$sqlLastWeek = "SELECT * FROM details WHERE rdate >= DATE_SUB(CURDATE(), INTERVAL 7 DAY) AND userID = ?";
+$stmt = $conn->prepare($sqlLastWeek);
+$stmt->bind_param('i', $_SESSION['userID']);
+$stmt->execute();
+$resultLastWeek = $stmt->get_result();
 
+// Handle search functionality
 $key = isset($_GET['search']) ? $_GET['search'] : '';
 
 if (!empty($key)) {
-    $sqlLastWeek = "SELECT * FROM details WHERE rdate >= DATE_SUB(CURDATE(), INTERVAL 7 DAY) AND routine LIKE ?";
+    // Modify the query to include a search condition
+    $sqlLastWeek = "SELECT * FROM details WHERE rdate >= DATE_SUB(CURDATE(), INTERVAL 7 DAY) AND routine LIKE ? AND userID = ?";
     $stmt = $conn->prepare($sqlLastWeek);
-    $likeKey = "%" . $conn->real_escape_string($key) . "%"; 
-    $stmt->bind_param('s', $likeKey);
+    
+    // Using '%' for wildcards around the search key
+    $likeKey = "%" . $key . "%";
+    $stmt->bind_param('si', $likeKey, $_SESSION['userID']);
     $stmt->execute();
     $resultLastWeek = $stmt->get_result();
-} else {
-    $resultLastWeek = mysqli_query($conn, $sqlLastWeek);
 }
-
 ?>
 
 <!DOCTYPE html>
@@ -48,7 +53,7 @@ if (!empty($key)) {
         }
 
         .container {
-            margin-top:30px;
+            margin-top: 30px;
             max-width: 800px; 
             width: 100%;
             background-color: white; 
@@ -124,7 +129,7 @@ if (!empty($key)) {
             color: white;
             border: none;
             border-radius: 8px;
-            cursor:pointer;
+            cursor: pointer;
         }
     </style>
 </head>
@@ -143,21 +148,22 @@ if (!empty($key)) {
 
     <?php if ($resultLastWeek && mysqli_num_rows($resultLastWeek) > 0): ?>
         <?php while ($row = mysqli_fetch_assoc($resultLastWeek)): ?>
-                <div class="exercise-card">
-                    <h2>Routine: <?php echo htmlspecialchars($row['routine']); ?></h2>
-                    <p>Water Consumption: <?php echo htmlspecialchars($row['watercon']); ?> liters</p>
-                    <p>Weight: <?php echo htmlspecialchars($row['weight']); ?> kg</p>
-                    <p>Duration: <?php echo htmlspecialchars($row['duration']); ?> minutes</p>
-                    <p>Starting Time: <?php echo htmlspecialchars($row['stime']); ?></p>
-                    <p>Sets: <?php echo htmlspecialchars($row['sets']); ?></p>
-                    <p>Intensity Level: <?php echo htmlspecialchars($row['level']); ?></p>
+            <div class="exercise-card">
+                <h2>Routine: <?php echo htmlspecialchars($row['routine']); ?></h2>
+                <p>Water Consumption: <?php echo htmlspecialchars($row['watercon']); ?> liters</p>
+                <p>Weight: <?php echo htmlspecialchars($row['weight']); ?> kg</p>
+                <p>Duration: <?php echo htmlspecialchars($row['duration']); ?> minutes</p>
+                <p>Starting Time: <?php echo htmlspecialchars($row['stime']); ?></p>
+                <p>Sets: <?php echo htmlspecialchars($row['sets']); ?></p>
+                <p>Intensity Level: <?php echo htmlspecialchars($row['level']); ?></p>
 
-                    <a class="btn" href="updateform.php?detailsID=<?php echo $row['detailsID']; ?>">Update</a>
-                    <a class="btn" href="delete.php?detailsID=<?php echo $row['detailsID']; ?>">Delete</a>
-                </div>
+                <!-- Ensure that you have the correct field name for the unique identifier -->
+                <a class="btn" href="updateform.php?detailsID=<?php echo $row['id']; ?>">Update</a>
+                <a class="btn" href="delete.php?detailsID=<?php echo $row['id']; ?>">Delete</a>
+            </div>
         <?php endwhile; ?>
-    <?php else : ?>
-        <p>No exercises recorded for this date.</p>
+    <?php else: ?>
+        <p>No exercises recorded for the last week.</p>
     <?php endif; ?>
 
 </div>

@@ -6,11 +6,15 @@ require 'connect.php';
 
 $date = isset($_GET['date']) ? $_GET['date'] : '';
 
-$sql = "SELECT * FROM details WHERE rdate = ? AND userID = ". $_SESSION['userID'] . "";
+$sql = "SELECT * FROM details WHERE rdate = ? AND userID = ?";
 $stmt = $conn->prepare($sql);
-$stmt->bind_param('s', $date);
-$stmt->execute();
-$result = $stmt->get_result();
+if ($stmt) {
+    $stmt->bind_param('si', $date, $_SESSION['userID']);
+    $stmt->execute();
+    $result = $stmt->get_result();
+} else {
+    die("Query preparation failed: " . $conn->error);
+}
 ?>
 
 <!DOCTYPE html>
@@ -18,7 +22,7 @@ $result = $stmt->get_result();
 <head>
     <title>Huan Fitness</title>
     <style>
-                * {
+        * {
             margin: 0;
             padding: 0;
             box-sizing: border-box; 
@@ -40,12 +44,12 @@ $result = $stmt->get_result();
         }
 
         .container {
-            margin-top:30px;
+            margin-top: 30px;
             max-width: 800px; 
             width: 100%;
             background-color: white; 
             border-radius: 8px; 
-            box-shadow: 0 4px 6px rgba(0,0,0,0.3); 
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3); 
             padding: 15px; 
         }
 
@@ -54,7 +58,7 @@ $result = $stmt->get_result();
             padding: 15px; 
             margin: 20px; 
             border-radius: 8px; 
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2); 
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); 
         }
 
         h2 { 
@@ -143,28 +147,32 @@ $result = $stmt->get_result();
         </form>
     </div>
 
-    <?php if ($result && mysqli_num_rows($result) > 0): ?>
-        <?php while ($row = mysqli_fetch_assoc($result)): ?>
+    <?php if ($result && $result->num_rows > 0): ?>
+        <?php while ($row = $result->fetch_assoc()): ?>
             <div class="exercise-card">
                 <h2>Routine: <?php echo htmlspecialchars($row['routine']); ?></h2>
                 <p>Water Consumption: <?php echo htmlspecialchars($row['watercon']); ?> liters</p>
                 <p>Weight: <?php echo htmlspecialchars($row['weight']); ?> kg</p>
-                <p>Duration: <?php echo htmlspecialchars($row['duration']); ?> minutes</p>
+                <p>Duration: <?php echo htmlspecialchars($row['duration']); ?>s</p>
                 <p>Starting Time: <?php echo htmlspecialchars($row['stime']); ?></p>
                 <p>Sets: <?php echo htmlspecialchars($row['sets']); ?></p>
                 <p>Intensity Level: <?php echo htmlspecialchars($row['level']); ?></p>
 
-                <a class="btn" href="updateform.php?detailsID=<?php echo $row['detailsID']; ?>">Update</a>
-                <a class="btn" href="delete.php?detailsID=<?php echo $row['detailsID']; ?>">Delete</a>
+                <?php if (isset($row['id'])): ?> <!-- Changed from detailsID to id based on your table structure -->
+                    <a class="btn" href="updateform.php?detailsID=<?php echo urlencode($row['id']); ?>">Update</a>
+                    <a class="btn" href="delete.php?detailsID=<?php echo urlencode($row['id']); ?>">Delete</a>
+                <?php else: ?>
+                    <p>Error: detailsID not found for this record.</p>
+                <?php endif; ?>
             </div>
         <?php endwhile; ?>
     <?php else: ?>
         <p>No exercises recorded for this date.</p>
     <?php endif; ?>
-
 </div>
 
 <?php
+$stmt->close();
 $conn->close();
 ?>
 </body>
