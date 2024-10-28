@@ -27,12 +27,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['cancel_booking'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Booking Card</title>
+    <title>My Booking</title>
     <style>
         /* CSS styling */
         body {
             font-family: Arial, sans-serif;
-            background-color: #f8f8f8;
+            background-color: #EDF7ED;
         }
         .booking-card {
             display: flex;
@@ -77,9 +77,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['cancel_booking'])) {
             background-color: #E0E7FF;
             color: #6366F1;
         }
+        .tag.pending {
+            background-color: #ebf46c;
+            color: #000;
+        }
         .tag.confirmed {
             background-color: #DCFCE7;
             color: #16A34A;
+        }
+        .tag.cancelled {
+            background-color: #FEE2E2;
+            color: #B91C1C;
         }
         .booking-title {
             font-size: 18px;
@@ -171,6 +179,8 @@ if ($result->num_rows > 0) {
         $day = $date ? $date->format('d') : 'XX';
         $month = $date ? strtoupper($date->format('M')) : 'XXX';
 
+        $statusClass = strtolower($row['status']); // Convert status to lowercase for class matching
+
         echo '
         <div class="booking-card">
             <div class="booking-date">
@@ -180,7 +190,7 @@ if ($result->num_rows > 0) {
             <div class="booking-details">
                 <div class="booking-tags">
                     <span class="tag badminton">APPOINTMENT</span>
-                    <span class="tag confirmed">' . htmlspecialchars($row['status']) . '</span>
+                    <span class="tag tag ' . $statusClass . '">' . htmlspecialchars($row['status']) . '</span>
                 </div>
                 <div class="booking-title">' . htmlspecialchars($row['name']) . '</div>
                 <div class="booking-time">' . htmlspecialchars($row['time']) . '</div>

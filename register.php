@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Register Form Website</title>
+    <title>Register</title>
 </head>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900&display=swap');
 
 * {
     margin: 0;
@@ -86,7 +86,7 @@ html, body{
     top: 0;
     left: 0;
     z-index: 0;
-    background: -webkit-linear-gradient(left, #a445b2, #fa4299);
+    background: style="background-color: #009688";
     transition: all 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
 }
 
@@ -160,7 +160,7 @@ a{
 }
 
 form .field input[type="submit"]{
-    background: -webkit-linear-gradient(left, #a445b2, #fa4299);
+    background: style="background-color: #009688";
     color: #fff;
     font-size: 20px;
     font-weight: 500;
@@ -168,6 +168,7 @@ form .field input[type="submit"]{
     border: none;
     cursor: pointer;
 }
+
 .form-inner form .field select {
     width: 100%;
     height: 100%;
@@ -208,27 +209,27 @@ form .field input[type="submit"]{
             <div class="form-inner">
                 <form action="<?php echo $_SERVER['PHP_SELF'];?>" method="POST" class="signup">
                     <div class="field">
-                        <input type="text" name="email" placeholder="Email Address" required>
+                        <input type="email" name="email" placeholder="Email Address" required pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$">
                     </div>
                     <div class="field">
                         <input type="password" name="password" placeholder="Password" required>
                     </div>
                     <div class="field">
-                        <input type="number" name="phone_number" placeholder="Phone Number" reuired>
+                        <input type="number" name="phone_number" placeholder="Phone Number" required>
                     </div>
                     <div class="field">
-                        <input type="date" id="dateOfBirth" name="dateOfBirth">
+                        <input type="date" id="dateOfBirth" name="dateOfBirth" required>
                     </div>
                     <div class="field">
-                        <select name="gender" id="gender">
+                        <select name="gender" id="gender" required>
                             <option value="Male">Male</option>
                             <option value="Female">Female</option>
                         </select>
                     </div>
-                    <div class="field">
-                        <input type="submit" value="Signup" required>
+                    <div class="field" >
+                        <input type="submit" value="Signup" style="background-color: #009688" required>
                     </div>
-                    <p style="margin-top: 10%;text-align: center;">Already have an account? <a href="login.php">Login now</a></p>
+                    <p style="margin-top: 10%;text-align: center;">Already have an account? <a href="login.php" style="color: #009688">Login now</a></p>
                 </form>
             </div>
         </div>
@@ -236,6 +237,7 @@ form .field input[type="submit"]{
 </div>
 </body>
 <html>
+
 <?php
 require 'connect.php'; // Database connection
 
@@ -247,27 +249,32 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $dateOfBirth = $_POST['dateOfBirth'];
     $gender = $_POST['gender'];
 
-    // Set is_admin to 0 by default (not an admin)
-    $is_admin = 0;
-
-    // Hash the password for security
-    $hashed_password = password_hash($password, PASSWORD_DEFAULT);
-
-    // Prepare the SQL statement
-    $stmt = $conn->prepare("INSERT INTO userdata (phoneNum, email, password, dateOfBirth, gender, is_admin) VALUES (?, ?, ?, ?, ?, ?)");
-    
-    // Bind parameters (s for string, i for integer)
-    $stmt->bind_param("sssssi", $phone_number, $email, $hashed_password, $dateOfBirth, $gender, $is_admin);
-
-    // Execute the query
-    if ($stmt->execute()) {
-        echo "Signup successful!";
+    // Validate email format
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        echo "Invalid email format.";
     } else {
-        echo "Error: " . $stmt->error;
-    }
+        // Set is_admin to 0 by default (not an admin)
+        $is_admin = 0;
 
-    // Close the statement and connection
-    $stmt->close();
-    $conn->close();
+        // Hash the password for security
+        $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+
+        // Prepare the SQL statement
+        $stmt = $conn->prepare("INSERT INTO userdata (phoneNum, email, password, dateOfBirth, gender, is_admin) VALUES (?, ?, ?, ?, ?, ?)");
+        
+        // Bind parameters (s for string, i for integer)
+        $stmt->bind_param("sssssi", $phone_number, $email, $hashed_password, $dateOfBirth, $gender, $is_admin);
+
+        // Execute the query
+        if ($stmt->execute()) {
+            echo "Signup successful!";
+        } else {
+            echo "Error: " . $stmt->error;
+        }
+
+        // Close the statement and connection
+        $stmt->close();
+        $conn->close();
+    }
 }
 ?>

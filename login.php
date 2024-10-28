@@ -37,16 +37,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             if ($is_admin == 1) {
                 header("Location: admin.php");
             } elseif ($is_admin == 2) {
-                header("Location: nutritionist.php");
+                header("Location: nutrition.php");
             } else {
                 header("Location: home.php");
             }
             exit();
         } else {
-            $error = "Invalid email or password!";
+            echo "Invalid email or password!";
         }
     } else {
-        $error = "No user found with this email!";
+        echo "No user found with this email!";
     }
 
     $stmt->close();
@@ -55,6 +55,7 @@ $conn->close();
 ?>
 <!DOCTYPE html>
 <html lang="en">
+<title>Login</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
 
@@ -136,7 +137,7 @@ html, body{
     top: 0;
     left: 0;
     z-index: 0;
-    background: -webkit-linear-gradient(left, #a445b2, #fa4299);
+    background: #009688;
     transition: all 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
 }
 
@@ -194,7 +195,7 @@ input[type="radio"]{
 
 .form-inner form .pass-link a,
 a{
-    color: #fa4299;
+    color: #009688;
     text-decoration: none;
 }
 
@@ -210,7 +211,7 @@ a{
 }
 
 form .field input[type="submit"]{
-    background: -webkit-linear-gradient(left, #a445b2, #fa4299);
+    background: -webkit-linear-gradient(left, #009688, #0096889);
     color: #fff;
     font-size: 20px;
     font-weight: 500;
@@ -264,7 +265,7 @@ form .field input[type="submit"]{
                         <input type="password" name="password" placeholder="Password" required>
                     </div>
                     <div class="field">
-                        <input type="submit" value="Login" required>
+                        <input style="background-color: #009688"type="submit" value="Login" required>
                     </div>
                     <p style="margin-top: 10%;text-align: center;">Don't have an account? <a href="register.php">Signup now</a></p>
                 </form>

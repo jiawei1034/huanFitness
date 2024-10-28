@@ -1,4 +1,5 @@
 <?php
+session_start();
 error_reporting(E_ALL & E_NOTICE);
 
 $key = empty($_GET['search']) ? "" : $_GET['search'];
@@ -6,17 +7,25 @@ $key = empty($_GET['search']) ? "" : $_GET['search'];
 require 'connect.php';
 
 if ($key != "") {
-    $sql = "SELECT rdate, COUNT(*) as total_exercises, SUM(watercon) as total_watercon FROM details WHERE DAY(rdate) = ? OR MONTHNAME(rdate) LIKE ? GROUP BY rdate;";
+    $sql = "SELECT rdate, COUNT(*) as total_exercises, SUM(watercon) as total_watercon 
+            FROM details 
+            WHERE userID = ? AND (DAY(rdate) = ? OR MONTHNAME(rdate) LIKE ?) 
+            GROUP BY rdate;";
     $stmt = mysqli_prepare($conn, $sql);
 
     $dayKey = (int)$key;
     $monthKey = '%' . mysqli_real_escape_string($conn, ucfirst(strtolower($key))) . '%';
     
-    mysqli_stmt_bind_param($stmt, 'is', $dayKey, $monthKey); 
+    mysqli_stmt_bind_param($stmt, 'iis', $_SESSION['userID'], $dayKey, $monthKey); 
 } else {
-    $sql = "SELECT rdate, COUNT(*) as total_exercises, SUM(watercon) as total_watercon FROM details GROUP BY rdate LIMIT 0,3;";
+    $sql = "SELECT rdate, COUNT(*) as total_exercises, SUM(watercon) as total_watercon 
+            FROM details 
+            WHERE userID = ? 
+            GROUP BY rdate 
+            LIMIT 0, 3;";
     $stmt = mysqli_prepare($conn, $sql);
 }
+
 
 mysqli_stmt_execute($stmt);
 $result = mysqli_stmt_get_result($stmt);

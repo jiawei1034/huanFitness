@@ -48,6 +48,11 @@
             font-weight: bold;
             margin-right: 5px;
         }
+        .tag.badminton {
+            background-color: #E0E7FF;
+            color: #6366F1;
+        }
+
         .tag.pending {
             background-color: #ebf46c;
             color: #000;
@@ -104,7 +109,7 @@
         }
 
         #booking-header {
-            margin-left: 30%;
+            margin-left: 43%;
         }
     </style>
 </head>
@@ -112,15 +117,49 @@
 <?php
 // Include the connection to your database
 require 'connect.php';
-// Query to fetch the latest booking or a specific one based on criteria
-$sql = "SELECT name, booking_id, phoneNum, email, date, name, time, status FROM booking ORDER BY date DESC"; // Modify query as needed to filter results
+
+// Handle form submissions
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    if (isset($_POST['update_status'])) {
+        $booking_id = intval($_POST['booking_id']);
+        // Prepare the SQL statement to update the status
+        $stmt = $conn->prepare("UPDATE booking SET status = 'CONFIRMED' WHERE booking_id = ?");
+        $stmt->bind_param("i", $booking_id);
+
+        // Execute the query
+        if ($stmt->execute()) {
+            echo "<p style='text-align: center; color: green;'>Booking confirmed successfully!</p>";
+        } else {
+            echo "<p style='text-align: center; color: red;'>Error updating booking: " . $stmt->error . "</p>";
+        }
+        $stmt->close();
+    }
+
+    if (isset($_POST['cancel_booking'])) {
+        $booking_id = intval($_POST['booking_id']);
+        // Prepare the SQL statement to delete the booking
+        $stmt = $conn->prepare("DELETE FROM booking WHERE booking_id = ?");
+        $stmt->bind_param("i", $booking_id);
+
+        // Execute the query
+        if ($stmt->execute()) {
+            echo "<p style='text-align: center; color: green;'>Booking cancelled successfully!</p>";
+        } else {
+            echo "<p style='text-align: center; color: red;'>Error cancelling booking: " . $stmt->error . "</p>";
+        }
+        $stmt->close();
+    }
+}
+
+// Query to fetch bookings
+$sql = "SELECT name, booking_id, phoneNum, email, date, time, status FROM booking ORDER BY date DESC";
 $result = $conn->query($sql);
 
-echo '<h2 id="booking-header">My Appointments</h2>';
+echo '<h2 id="booking-header">Manage Bookings</h2>';
 // Check if any rows were returned
 if ($result->num_rows > 0) {
-    // Output data of each row (for now, just one row since we're limiting it to 1 booking)
-    while($row = $result->fetch_assoc()) {
+    // Output data of each row
+    while ($row = $result->fetch_assoc()) {
         // Assuming 'date' is stored as 'YYYY-MM-DD' or similar in the database
         $date = DateTime::createFromFormat('Y-m-d', $row['date']);
         
@@ -152,37 +191,27 @@ if ($result->num_rows > 0) {
                 <div class="booking-title">' . htmlspecialchars($row['name']) . '</div>
                 <div class="booking-time">' . htmlspecialchars($row['time']) . '</div>
                 <div class="booking-location">Huan Fitness Centre</div>
-                 <form action="' . htmlspecialchars($_SERVER['PHP_SELF']) . '" method="POST">
-                    <input type="hidden" name="update_status" value="COMFIRMED">
+                <form action="' . htmlspecialchars($_SERVER['PHP_SELF']) . '" method="POST" onsubmit="return confirm(\'Are you sure you want to accept this booking?\');">
+                    <input type="hidden" name="update_status" value="CONFIRMED">
+                    <input type="hidden" name="booking_id" value="' . htmlspecialchars($row['booking_id']) . '">
                     <button class="accept-btn" type="submit">Accept</button>
                 </form>
-                <button class="cancel-btn">Cancel</button>
+                <form action="' . htmlspecialchars($_SERVER['PHP_SELF']) . '" method="POST" onsubmit="return confirm(\'Are you sure you want to cancel this booking?\');">
+                    <input type="hidden" name="cancel_booking" value="1">
+                    <input type="hidden" name="booking_id" value="' . htmlspecialchars($row['booking_id']) . '">
+                    <button class="cancel-btn" type="submit">Cancel</button>
+                </form>
             </div>
         </div>';
     }
 } else {
     echo "No bookings found.";
 }
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $update_status = $_POST['update_status'];
-    // Prepare the SQL statement
-    $stmt = $conn->prepare("UPDATE booking set status = 'CONFIRMED' WHERE booking_id = 100004");
-    
-    // Execute the query
-    if ($stmt->execute()) {
-        // Set a success message to be displayed
-        $successMessage = "Updated Successful!";
-        // Close the statement and connection
-        $stmt->close();
-        $conn->close();
-    } else {
-        echo "Error: " . $stmt->error;
-    }
-    
-}
+
+$conn->close();
 ?>
 
-    <!-- Include Font Awesome for the arrow icon -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"></script>
+<!-- Include Font Awesome for the arrow icon -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"></script>
 </body>
 </html>
