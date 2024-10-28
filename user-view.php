@@ -30,10 +30,11 @@ require 'connect.php';
            <div class="card-body">
 
            <?php
+           session_start();
            if(isset($_GET['id']))
            {
              $user_id = mysqli_real_escape_string($conn, $_GET['id']);
-            $query = "SELECT * FROM userdata WHERE id='$user_id'";
+            $query = "SELECT * FROM userdata WHERE userID = ". $_SESSION['userID'] . "";
             $query_run = mysqli_query($conn, $query);
 
             if(mysqli_num_rows($query_run) > 0)

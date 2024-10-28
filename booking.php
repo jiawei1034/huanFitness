@@ -22,7 +22,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 
     // Prepare the SQL statement
-    $stmt = $conn->prepare("INSERT INTO booking (name, phoneNum, email, date, time, nutritionist) VALUES (?, ?, ?, ?, ?, ?)");
+    $stmt = $conn->prepare("INSERT INTO booking (name, phoneNum, email, date, time, nutritionistid) VALUES (?, ?, ?, ?, ?, ?)");
     
     // Bind parameters (s for string)
     $stmt->bind_param("ssssss", $name, $phoneNum, $email, $date, $time, $nutritionist);

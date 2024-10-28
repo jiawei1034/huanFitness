@@ -1,3 +1,27 @@
+<?php 
+// Start the session and include necessary files
+session_start();
+require 'connect.php'; // Database connection
+require 'navbar.php'; // Navbar (optional)
+
+// Handle booking cancellation
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['cancel_booking'])) {
+    $booking_id = intval($_POST['booking_id']); // Get booking ID from the form
+
+    // SQL to delete booking
+    $sql = "DELETE FROM booking WHERE booking_id = ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("i", $booking_id);
+
+    if ($stmt->execute()) {
+        echo "<p style='text-align: center; color: green;'>Booking cancelled successfully.</p>";
+    } else {
+        echo "<p style='text-align: center; color: red;'>Error cancelling booking. Please try again.</p>";
+    }
+    $stmt->close();
+}
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -5,6 +29,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Booking Card</title>
     <style>
+        /* CSS styling */
         body {
             font-family: Arial, sans-serif;
             background-color: #f8f8f8;
@@ -81,40 +106,64 @@
         .cancel-btn:hover {
             background-color: #DC2626;
         }
-
-        #booking-header {
-            margin-left: 30%;
+        .booking-header {
+            text-align: center;
+            font-size: 24px;
+            margin-top: 20px;
+            color: #333;
+        }
+        .add-booking-button {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            padding: 20px;
+            margin: 20px auto;
+            max-width: 600px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            text-decoration: none;
+        }
+        .add-booking-icon {
+            background-color: #4AA583;
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
         }
     </style>
 </head>
 <body>
+
+<h2 class="booking-header">My Bookings</h2>
+
+<!-- Add Booking Button -->
+<a href="booking.php" class="add-booking-button">
+    <div class="add-booking-icon">+</div>
+</a>
+
 <?php
-// Include the connection to your database
-require 'connect.php';
+// Query to fetch bookings for the logged-in user
+$sql = "SELECT b.booking_id, u.userID, b.name, b.phoneNum, b.date, b.time, nu.name AS nutritionist_name 
+FROM booking b, userdata u, nutritionist nu 
+WHERE b.nutritionistID = nu.nutritionistID AND u.userID = " . $_SESSION['userID'] . " 
+ORDER BY b.date DESC ";
+$stmt = $conn->prepare($sql);
+$stmt->execute();
+$result = $stmt->get_result();
 
-// Query to fetch the latest booking or a specific one based on criteria
-$sql = "SELECT name, phoneNum, email, date, time, nutritionist FROM booking ORDER BY date DESC"; // Modify query as needed to filter results
-$result = $conn->query($sql);
-
-echo '<h2 id="booking-header">My Bookings</h2>';
-// Check if any rows were returned
 if ($result->num_rows > 0) {
-    // Output data of each row (for now, just one row since we're limiting it to 1 booking)
     while($row = $result->fetch_assoc()) {
-        // Assuming 'date' is stored as 'YYYY-MM-DD' or similar in the database
         $date = DateTime::createFromFormat('Y-m-d', $row['date']);
-        
-        // Check if $date was successfully parsed
-        if ($date !== false) {
-            $day = $date->format('d');
-            $month = strtoupper($date->format('M')); // Convert month to uppercase
-        } else {
-            // Default values if date parsing fails
-            $day = 'XX';
-            $month = 'XXX';
-        }
+        $day = $date ? $date->format('d') : 'XX';
+        $month = $date ? strtoupper($date->format('M')) : 'XXX';
 
-        // Display booking details in HTML structure
         echo '
         <div class="booking-card">
             <div class="booking-date">
@@ -126,24 +175,25 @@ if ($result->num_rows > 0) {
                     <span class="tag badminton">APPOINTMENT</span>
                     <span class="tag confirmed">CONFIRMED</span>
                 </div>
-                <div class="booking-title">' . htmlspecialchars($row['nutritionist']) . '</div>
+                <div class="booking-title">' . htmlspecialchars($row['name']) . '</div>
                 <div class="booking-time">' . htmlspecialchars($row['time']) . '</div>
                 <div class="booking-location">Huan Fitness Centre</div>
-                <button class="cancel-btn">Cancel</button>
+
+                <!-- Cancel Booking Form -->
+                <form method="POST" action="">
+                    <input type="hidden" name="booking_id" value="' . htmlspecialchars($row['booking_id']) . '">
+                    <button type="submit" class="cancel-btn" name="cancel_booking">Cancel</button>
+                </form>
             </div>
         </div>';
     }
 } else {
-    echo "No bookings found.";
+    echo "<p style='text-align: center; color: #888;'>No bookings found.</p>";
 }
 
-// Close the database connection
+$stmt->close();
 $conn->close();
 ?>
 
-
-
-    <!-- Include Font Awesome for the arrow icon -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"></script>
 </body>
 </html>

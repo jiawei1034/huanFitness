@@ -83,6 +83,6 @@ body {
                 <li><a href="home.php">Home</a></li>
                 <li><a href="#">Physical Training</a></li>
                 <li><a href="#">Membership</a></li>
-                <li><a href="booking.php">Book Now</a></li>
+                <li><a href="view_booking.php">Book Now</a></li>
             </ul>
         </div>
