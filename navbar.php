@@ -82,7 +82,7 @@ body {
             <ul>
                 <li><a href="home.php">Home</a></li>
                 <li><a href="view_booking.php">Booking</a></li>
-                <li><a href="#">Membership</a></li>
-                <li><a href="#">Leaderboard</a></li>
+                <li><a href="price.php">Membership</a></li>
+                <li><a href="leaderboard.php">Leaderboard</a></li>
             </ul>
         </div>
